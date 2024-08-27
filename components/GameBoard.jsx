@@ -73,10 +73,70 @@ const GameBoard = () => {
       checkForGhostCollision(newPos);
     };
 
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      setTouchStart({ x: touch.clientX, y: touch.clientY });
+    };
+
+    const handleTouchEnd = (e) => {
+      const touch = e.changedTouches[0];
+      const dx = touch.clientX - touchStart.x;
+      const dy = touch.clientY - touchStart.y;
+
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) {
+          // Right swipe
+          handleMove("ArrowRight");
+        } else {
+          // Left swipe
+          handleMove("ArrowLeft");
+        }
+      } else {
+        if (dy > 0) {
+          // Down swipe
+          handleMove("ArrowDown");
+        } else {
+          // Up swipe
+          handleMove("ArrowUp");
+        }
+      }
+    };
+
+    const handleMove = (direction) => {
+      let newPos = { ...playerPosition };
+
+      switch (direction) {
+        case "ArrowUp":
+          newPos.y = Math.max(0, playerPosition.y - 1);
+          break;
+        case "ArrowDown":
+          newPos.y = Math.min(boardSize - 1, playerPosition.y + 1);
+          break;
+        case "ArrowLeft":
+          newPos.x = Math.max(0, playerPosition.x - 1);
+          break;
+        case "ArrowRight":
+          newPos.x = Math.min(boardSize - 1, playerPosition.x + 1);
+          break;
+        default:
+          break;
+      }
+
+      setPlayerPosition(newPos);
+      checkForLoveSymbol(newPos);
+      checkForGhostCollision(newPos);
+    };
+
+    let touchStart = { x: 0, y: 0 };
+
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [playerPosition]);
 
